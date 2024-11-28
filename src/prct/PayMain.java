@@ -7,7 +7,7 @@ public class PayMain {
 
         Scanner scanner = new Scanner(System.in);
         PayService payService = new PayService();
-        PayAmount payAmount = new PayAmount();
+        PaymentManagement payAmount = new PaymentManagement();
 
         while (true) {
             System.out.println("메뉴를 선택해주세요");

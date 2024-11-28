@@ -1,9 +1,9 @@
 package prct;
 
-public class PayAmount {
+public class PaymentManagement {
     private int sumAmount;
 
-    public PayAmount() {
+    public PaymentManagement() {
         this.sumAmount = 0;
     }
 
