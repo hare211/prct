@@ -1,4 +1,4 @@
-package objectOriented.getsome;
+package ex.objectOriented.getsome;
 
 public class Account {
     int balance;

@@ -1,4 +1,4 @@
-package objectOriented.pay;
+package ex.objectOriented.pay;
 
 public class DefaultPay implements Pay{
     @Override

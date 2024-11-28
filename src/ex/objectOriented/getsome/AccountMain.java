@@ -1,4 +1,4 @@
-package objectOriented.getsome;
+package ex.objectOriented.getsome;
 
 import java.util.Scanner;
 

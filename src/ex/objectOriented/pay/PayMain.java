@@ -1,4 +1,4 @@
-package objectOriented.pay;
+package ex.objectOriented.pay;
 
 import java.util.Scanner;
 

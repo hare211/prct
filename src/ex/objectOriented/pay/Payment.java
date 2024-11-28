@@ -1,4 +1,4 @@
-package objectOriented.pay;
+package ex.objectOriented.pay;
 
 public abstract class Payment {
     public static Pay findPay(String option) {

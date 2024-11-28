@@ -1,4 +1,4 @@
-package objectOriented.getsome;
+package ex.objectOriented.getsome;
 
 public class RectangleProceduralMain1 {
     public static void main(String[] args) {
