@@ -1,4 +1,4 @@
-package ex.objectOriented.pay;
+package ex.ex2.pay;
 
 public class PayAmount {
     private int totalAmount = 0;

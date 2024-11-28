@@ -1,4 +1,4 @@
-package ex.objectOriented.poly;
+package ex.ex2.poly;
 
 public class Child extends Parent{
     public String value = "parent";

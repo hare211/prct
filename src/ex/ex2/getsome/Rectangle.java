@@ -1,4 +1,4 @@
-package ex.objectOriented.getsome;
+package ex.ex2.getsome;
 
 public class Rectangle {
     int width;

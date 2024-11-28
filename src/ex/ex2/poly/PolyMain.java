@@ -1,4 +1,4 @@
-package ex.objectOriented.poly;
+package ex.ex2.poly;
 
 public class PolyMain {
     public static void main(String[] args) {
