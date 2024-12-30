@@ -14,7 +14,7 @@ import sist.commons.*;
 import java.awt.*;
 // 마우스 / 버튼 / 엔터 => 서버로 전송
 // 서버에서 전송하는 값 읽기 => 자동화 처리 => 쓰레드
-
+// c
 public class ChatMain extends JFrame implements ActionListener, Runnable, MouseListener {
     Login login = new Login();
     WaitRoom wr = new WaitRoom();
