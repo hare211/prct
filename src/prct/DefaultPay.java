@@ -6,5 +6,5 @@ public class DefaultPay implements Pay{
         System.out.println("존재하지 않는 시스템입니다.");
         return false;
         //
-    }
+    }// commit
 }
