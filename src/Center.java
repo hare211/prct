@@ -1,7 +1,7 @@
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class Center {
+public class Center { // c
     public static void main(String[] args) {
 
 //      1.5명의 학생의 국어점수를 받아서 등수를 출력하는 프로그램 작성
