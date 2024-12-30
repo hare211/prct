@@ -329,3 +329,174 @@ public class Server implements Runnable{
     }
 
 }
+/*
+### 1. **문제 분석**
+
+- 예외가 발생한 부분: `Server$Client.run`의 `in.readLine()` 호출.
+- `in`이 `null`인 이유:
+    - `Client` 객체 생성 시 스트림 초기화 실패 (`new BufferedReader(...)`에서 예외 발생).
+    - `in.close()`로 스트림이 이미 닫혔지만, 다른 쓰레드에서 `run()`이 계속 실행됨.
+    - 스트림이 닫힌 후 `in`을 `null`로 설정하지 않았기 때문에 다른 코드에서 접근 시도.
+
+### 2. **해결 방안**
+
+### **(1) `Client` 생성자에서 스트림 초기화 확인**
+
+`BufferedReader` 초기화 실패 시 로그를 출력하고, 객체 생성이 완전하지 않을 경우 종료.
+
+```java
+public Client(Socket s) {
+    try {
+        this.s = s;
+        out = s.getOutputStream();
+        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+    } catch (Exception ex) {
+        System.err.println("Error initializing Client streams: " + ex.getMessage());
+        ex.printStackTrace();
+        // 스트림 초기화 실패 시, 객체를 생성하지 않도록 종료
+        closeStreams();
+    }
+}
+```
+
+### **(2) `run` 메서드에서 스트림 상태 확인**
+
+`in`이 `null`인 상태에서 접근하지 않도록 체크.
+
+```java
+public void run() {
+    try {
+        while (true) {
+            if (in == null) { // 스트림이 초기화되지 않은 경우
+                System.err.println("Input stream is null. Exiting thread.");
+                break; // 쓰레드 종료
+            }
+            String msg = in.readLine();
+            if (msg == null) { // 클라이언트가 연결을 끊은 경우
+                System.out.println("Client disconnected.");
+                break;
+            }
+            System.out.println("Client => " + msg);
+            handleProtocol(msg);
+        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    } finally {
+        closeStreams();
+    }
+}
+```
+
+### **(3) 스트림을 안전하게 닫는 메서드 추가**
+
+`closeStreams()`를 만들어 스트림을 닫고, `null`로 설정해 다음 접근을 방지.
+
+```java
+private void closeStreams() {
+    try {
+        if (in != null) {
+            in.close();
+            in = null;
+        }
+        if (out != null) {
+            out.close();
+            out = null;
+        }
+        if (s != null) {
+            s.close();
+            s = null;
+        }
+    } catch (IOException ex) {
+        ex.printStackTrace();
+    }
+}
+```
+
+### **(4) 예외가 발생한 클라이언트 안전 제거**
+
+`waitVc` 리스트에서 문제가 있는 클라이언트를 안전하게 제거하고 관련 리소스를 정리.
+
+```java
+public synchronized void messageAll(String msg) {
+    for (int i = 0; i < waitVc.size(); i++) {
+        Client c = waitVc.get(i);
+        try {
+            c.messageTo(msg);
+        } catch (Exception ex) {
+            System.err.println("Error sending message to client: " + ex.getMessage());
+            waitVc.remove(i--); // 인덱스 보정
+            c.closeStreams();   // 리소스 정리
+            ex.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+// 기존 run() 메서드 안에 있던 switch 문을 따로 캡슐화 한 hanldeProtocol 메서드
+private void handleProtocol(String msg) {
+    try {
+        StringTokenizer st = new StringTokenizer(msg, "|");
+        int protocol = Integer.parseInt(st.nextToken());
+
+        switch (protocol) {
+            case Function.LOGIN: {
+                id = st.nextToken();
+                name = st.nextToken();
+                sex = st.nextToken();
+                pos = "대기실";
+
+                messageAll(Function.LOGIN + "|"
+                        + id + "|" + name + "|" + sex + "|" + pos);
+                messageAll(Function.WAITCHAT + "|[알림]" + name + "님 입장하셨습니다");
+                waitVc.add(this);
+                messageTo(Function.MYLOG + "|" + id);
+                for (Client c : waitVc) {
+                    messageTo(Function.LOGIN + "|" + c.id + "|" + c.name + "|" + c.sex + "|" + c.pos);
+                }
+            }
+            break;
+            case Function.WAITCHAT: {
+                messageAll(Function.WAITCHAT + "|[" + name + "] " + st.nextToken());
+            }
+            break;
+            case Function.EXIT: {
+                messageAll(Function.EXIT + "|" + id);
+                messageAll(Function.WAITCHAT + "|[알림]" + name + "님이 퇴장하셨습니다.");
+                messageTo(Function.MYEXIT + "|");
+                for (int i = 0; i < waitVc.size(); i++) {
+                    Client c = waitVc.get(i);
+                    if (c.id.equals(id)) {
+                        waitVc.remove(i);
+                        closeStreams();
+                        break;
+                    }
+                }
+            }
+            break;
+            case Function.INFO: {
+                String yid = st.nextToken();
+                for (Client c : waitVc) {
+                    if (yid.equals(c.id)) {
+                        messageTo(Function.INFO + "|" + c.id + "|" + c.name + "|" + c.sex + "|" + c.pos);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+}
+```
+
+- 기존의 run() 메서드 안에 있던 switch 문이 너무 복잡하고 가독성이 떨어져 따로 메서드로 캡슐화하였음
+
+### 3. **최종 요약**
+
+- **`Client` 생성자**에서 스트림 초기화 실패를 처리.
+- **`run` 메서드**에서 `in`의 상태를 체크해 `NullPointerException` 방지.
+- **`closeStreams` 메서드**로 스트림과 소켓을 안전하게 닫음.
+- `waitVc` 리스트에서 문제가 있는 클라이언트를 제거하며 리소스를 정리.
+ */
