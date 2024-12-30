@@ -1,8 +1,5 @@
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Center {
     public static void main(String[] args) {
@@ -211,6 +208,7 @@ public class Center {
         System.out.print("짝수 최대값 : " + evenMax + ", 홀수 최대값 : " + oddMax);
 
          */
+
 
 //		13.3명의 학생에 대한 국어,영어,수학 점수를 입력받아서 저장후에 총점,평균,등수를 구하고
 //		국어점수 총점,영어점수 총점,수학점수의 총점을 구해서 출력하는 프로그램을 작성하시오

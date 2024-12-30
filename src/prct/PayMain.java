@@ -19,22 +19,20 @@ public class PayMain {
                 case 1:
                     System.out.print("결제 시스템 입력 : ");
                     String option = scanner.nextLine();
-
                     System.out.print("결제 금액 입력 : ");
                     int amount = scanner.nextInt();
 
                     payService.processPay(option, amount);
                     payAmount.addAmount(amount);
-                    break;
+                    continue;
                 case 2:
                     System.out.println("총 결제금액 : " + payAmount.getAmount());
-                    break;
+                    continue;
                 case 3:
                     System.out.println("프로그램을 종료합니다.");
                     return;
                 default:
                     System.out.println("잘못된 메뉴입니다.");
-                    break;
             }
         }
 
